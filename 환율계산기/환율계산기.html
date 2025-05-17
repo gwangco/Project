@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환율 계산기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .menu {
+            width: 100%;
+            background: rgba(43, 31, 148, 0.7);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .menu a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 20px;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        .menu a:hover {
+            color: #ff4b2b;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .converter {
+            width: 90%;
+            max-width: 400px;
+            padding: 40px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        h1::before {
+            content: "💸";
+            font-size: 32px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            color: #ddd;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            outline: none;
+        }
+
+        option {
+            background-color: #333;
+            color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(145deg, #ff416c, #ff4b2b);
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <body>
+        <!-- 상단 메뉴: 환율 계산기, 환율 차트, 퍼센트 계산기 링크 -->
+        <div class="menu">
+            <a href="환율계산기.html#converterSection">환율 계산기</a>
+            <a href="환율차트.html#chartSection">환율 차트</a>
+            <a href="퍼센트계산기.html#converterSection">퍼센트 계산기</a>
+        </div>
+        
+        <!-- 환율 계산기 섹션 -->
+        <div id="converterSection" class="container">
+            <div class="converter">
+                <h1>환율 계산기</h1>
+                <!-- 금액 입력 필드 -->
+                <label for="amount">금액 입력:</label>
+                <input type="text" id="amount" placeholder="금액을 입력하세요">
+    
+                <!-- 기준 통화 선택 -->
+                <label for="fromCurrency">기준 통화:</label>
+                <select id="fromCurrency">
+                    <option value="KRW">₩ KRW (원)</option>
+                    <option value="USD">$ USD (미국 달러)</option> 
+                    <option value="EUR">€ EUR (유로)</option>
+                    <option value="JPY">¥ JPY (일본 엔)</option>
+                    <option value="GBP">£ GBP (영국 파운드)</option>
+                    <option value="AUD">A$ AUD (호주 달러)</option>
+                    <option value="CAD">C$ CAD (캐나다 달러)</option>
+                    <option value="CHF">Fr. CHF (스위스 프랑)</option>
+                    <option value="CNY">¥ CNY (중국 위안)</option>
+                </select>
+    
+                <!-- 변환할 통화 선택 -->
+                <label for="toCurrency">변환할 통화:</label>
+                <select id="toCurrency">
+                    <option value="KRW">₩ KRW (원)</option>
+                    <option value="USD">$ USD (미국 달러)</option> 
+                    <option value="EUR">€ EUR (유로)</option>
+                    <option value="JPY">¥ JPY (일본 엔)</option>
+                    <option value="GBP">£ GBP (영국 파운드)</option>
+                    <option value="AUD">A$ AUD (호주 달러)</option>
+                    <option value="CAD">C$ CAD (캐나다 달러)</option>
+                    <option value="CHF">Fr. CHF (스위스 프랑)</option>
+                    <option value="CNY">¥ CNY (중국 위안)</option>
+                </select>
+    
+                <!-- 환율 계산 버튼 -->
+                <button onclick="convertCurrency()">환율 계산</button>
+    
+                <!-- 결과 표시 -->
+                <h2 id="result">결과: </h2>
+            </div>
+        </div>
+    
+        <script>
+            // API 키 설정
+            const API_KEY = '';
+    
+            // 통화 기호 객체 정의
+            const currencySymbols = {
+                KRW: '₩',
+                USD: '$',
+                EUR: '€',
+                JPY: '¥',
+                GBP: '£',
+                AUD: 'A$',
+                CAD: 'C$',
+                CHF: 'Fr.',
+                CNY: '¥'
+            };
+    
+            // 금액 입력 필드에 숫자 형식 설정
+            document.getElementById("amount").addEventListener("input", formatAmount);
+    
+            function formatAmount(event) {
+                const input = event.target;
+                let value = input.value.replace(/,/g, '');
+                value = value.replace(/[^\d]/g, '');
+    
+                if (value) {
+                    input.value = parseFloat(value).toLocaleString();
+                } else {
+                    input.value = '';
+                }
+            }
+    
+            // 환율을 가져오는 함수
+            async function getExchangeRate(fromCurrency, toCurrency) {
+                const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`);
+                const data = await response.json();
+                return data.rates[toCurrency];
+            }
+    
+            // 환율 변환 함수
+            async function convertCurrency() {
+                const amountInput = document.getElementById("amount").value;
+                const fromCurrency = document.getElementById("fromCurrency").value;
+                const toCurrency = document.getElementById("toCurrency").value;
+    
+                const amount = parseFloat(amountInput.replace(/,/g, ''));
+    
+                // 금액이 유효한지 검사
+                if (isNaN(amount) || amount <= 0) {
+                    alert("유효한 금액을 입력하세요.");
+                    return;
+                }
+    
+                try {
+                    // 환율 가져오기 및 변환 금액 계산
+                    const rate = await getExchangeRate(fromCurrency, toCurrency);
+                    const convertedAmount = amount * rate;
+                    const formattedAmount = convertedAmount.toLocaleString();
+                    const toCurrencySymbol = currencySymbols[toCurrency] || '';
+                    document.getElementById("result").innerText = `결과: ${toCurrencySymbol}${formattedAmount} ${toCurrency}`;
+                } catch (error) {
+                    document.getElementById("result").innerText = "환율 데이터를 가져올 수 없습니다.";
+                }
+            }
+        </script>
+    </body>
+    </html>

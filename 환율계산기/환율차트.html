@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>환율 차트</title>
+    <style>
+      /* 전체 배경 스타일 */
+      body {
+        font-family: "Arial", sans-serif;
+        text-align: center;
+        padding: 20px;
+        background-color: #f7fbff; /* 밝은 파란색 배경 */
+        margin: 0;
+        color: #333;
+      }
+
+      .menu {
+        width: 100%;
+        background: #b17c67e1;
+        padding: 10px;
+        text-align: center;
+      }
+
+      .menu a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+        margin: 0 20px;
+        font-size: 18px;
+        transition: color 0.3s;
+      }
+
+      .menu a:hover {
+        color: #ff4b2b;
+      }
+
+      h1 {
+        color: #2d4059;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      /* 차트 컨테이너 스타일 */
+      #chart-container {
+        width: 90%;
+        max-width: 900px;
+        margin: 30px auto;
+        background: #ffffff; /* 하얀 배경 */
+        box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+        border-radius: 20px; /* 둥근 모서리 */
+        padding: 30px;
+        border: 1px solid #dce4ec;
+      }
+
+      /* 드롭다운 메뉴 스타일 */
+      select {
+        padding: 12px 20px;
+        font-size: 16px;
+        border: 1px solid #cfd9e6;
+        border-radius: 10px;
+        outline: none;
+        cursor: pointer;
+        background: #ffffff;
+        color: #555;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* 드롭다운 그림자 */
+        transition: all 0.3s ease;
+      }
+
+      select:hover {
+        background: #f0f4f8;
+        border-color: #a8b8c8;
+      }
+
+      /* 로딩 텍스트 스타일 */
+      #loading {
+        display: none;
+        font-size: 14px;
+        color: #777;
+        margin-top: 10px;
+        font-style: italic;
+      }
+
+      /* 차트 크기 */
+      canvas {
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="menu">
+      <a href="환율계산기.html#converterSection">환율 계산기</a>
+      <a href="환율차트.html#chartSection">환율 차트</a>
+      <a href="퍼센트계산기.html#converterSection">퍼센트 계산기</a>
+    </div>
+
+    <h1>환율 차트</h1>
+    <div>
+      <label
+        for="target"
+        style="font-size: 16px; font-weight: bold; color: #444"
+        >대상 통화:</label
+      >
+      <select id="target">
+        <option value="USD">USD</option>
+      </select>
+    </div>
+    <p id="loading">환율 데이터를 불러오는 중...</p>
+    <div id="chart-container">
+      <canvas id="chart" width="800" height="400"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      // API 키와 차트를 그릴 컨텍스트 초기화
+      const apiKey = "";
+      const chartContext = document.getElementById("chart").getContext("2d");
+      const loadingElement = document.getElementById("loading"); // 로딩 메시지
+      let exchangeChart; // 차트 객체
+
+      // 환율 데이터를 API에서 가져오는 비동기 함수
+      async function fetchExchangeRates() {
+        const url = `https://api.exchangeratesapi.io/v1/latest?access_key=${apiKey}`;
+        try {
+          const response = await fetch(url); // API 호출
+          if (!response.ok) {
+            throw new Error(`HTTP 에러! status: ${response.status}`); // 오류 처리
+          }
+          const data = await response.json(); // JSON 데이터 파싱
+          return data.rates; // 환율 데이터 반환
+        } catch (error) {
+          console.error("Error fetching exchange rate:", error); // 오류 메시지 출력
+          alert("환율 데이터를 불러오는 데 문제가 발생했습니다."); // 사용자 알림
+          return null; // 데이터가 없을 경우 null 반환
+        }
+      }
+
+      // 차트를 업데이트하는 함수
+      async function updateChart() {
+        const target = document.getElementById("target").value; // 선택된 기준 통화
+
+        loadingElement.style.display = "block"; // 로딩 메시지 표시
+        const rates = await fetchExchangeRates(); // 환율 데이터 가져오기
+        loadingElement.style.display = "none"; // 로딩 메시지 숨기기
+
+        if (!rates || !rates[target]) return; // 데이터가 없으면 함수 종료
+
+        // 주요 통화 데이터를 정리
+        const selectedRates = {
+          EUR: rates.EUR,
+          USD: rates.USD,
+          KRW: rates.KRW,
+          JPY: rates.JPY,
+          GBP: rates.GBP,
+          AUD: rates.AUD,
+          CAD: rates.CAD,
+          CHF: rates.CHF,
+          CNY: rates.CNY,
+        };
+
+        // 차트 라벨과 데이터 생성
+        const labels = Object.keys(selectedRates); // 통화 종류
+        const data = labels.map(
+          (currency) => selectedRates[currency] / rates[target]
+        ); // 기준 통화로 나눈 환율 값
+
+        if (exchangeChart) {
+          exchangeChart.destroy(); // 기존 차트를 삭제
+        }
+
+        // 새 차트를 생성
+        exchangeChart = new Chart(chartContext, {
+          type: "line", // 선형 차트
+          data: {
+            labels, // 통화 종류 라벨
+            datasets: [
+              {
+                label: `1 ${target} = 다른 주요 통화`, // 데이터 설명
+                data, // 환율 데이터
+                borderColor: "#2d9cdb", // 선 색상
+                fill: false, // 배경 채우기 없음
+                tension: 0.4, // 선의 곡률
+                pointBackgroundColor: "#ffffff", // 데이터 점 배경색
+                pointBorderColor: "#2d9cdb", // 데이터 점 테두리 색상
+                pointBorderWidth: 2, // 데이터 점 테두리 두께
+              },
+            ],
+          },
+          options: {
+            responsive: true, // 반응형 설정
+            maintainAspectRatio: false, // 차트 비율 유지 해제
+            plugins: {
+              legend: { display: true }, // 범례 표시
+            },
+            scales: {
+              y: {
+                type: "logarithmic", // Y축 로그 스케일
+                beginAtZero: false, // 0에서 시작하지 않음
+                ticks: {
+                  callback: function (value) {
+                    return value.toLocaleString(); // 숫자를 보기 쉽게 표시
+                  },
+                },
+              },
+              x: {
+                title: {
+                  display: true, // X축 제목 표시
+                  text: "통화 종류", // X축 제목 텍스트
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // 드롭다운에서 통화를 변경했을 때 차트를 업데이트
+      document.getElementById("target").addEventListener("change", updateChart);
+
+      // 페이지 로드 시 기본 차트를 그리기 위해 호출
+      updateChart();
+    </script>
+  </body>
+</html>
