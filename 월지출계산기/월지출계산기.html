@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>월 지출 계산기</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 40px;
+        background-color: #f8f9fa;
+        color: #343a40;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      h1 {
+        color: #007bff;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        width: 80%;
+        max-width: 500px;
+      }
+
+      .input-group label {
+        flex-basis: 120px;
+        text-align: right;
+        line-height: 2.5;
+        color: #555;
+      }
+
+      input[type="number"],
+      input[type="text"],
+      select,
+      button {
+        padding: 12px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 1rem;
+        flex-grow: 1;
+      }
+
+      input[type="number"]:focus,
+      input[type="text"]:focus,
+      select:focus,
+      button:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+
+      button#addExpense,
+      button#calculate,
+      button#addDailyExpense {
+        background-color: #28a745;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+        padding: 12px 15px;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+      }
+
+      button#addExpense:hover,
+      button#calculate:hover,
+      button#addDailyExpense:hover {
+        background-color: #218838;
+      }
+
+      h2 {
+        color: #28a745;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      #expenseList,
+      #dailyExpenseList {
+        list-style-type: none;
+        padding: 0;
+        margin-bottom: 30px;
+        width: 80%;
+        max-width: 500px;
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      #expenseList li,
+      #dailyExpenseList li {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1rem;
+      }
+
+      #expenseList li:last-child,
+      #dailyExpenseList li:last-child {
+        border-bottom: none;
+      }
+
+      .deleteBtn {
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: 1.2rem;
+        opacity: 0.7;
+        transition: opacity 0.2s ease-in-out;
+      }
+
+      .deleteBtn:hover {
+        opacity: 1;
+      }
+
+      hr {
+        border: 0;
+        height: 1px;
+        background: #ccc;
+        margin: 30px 0;
+        width: 80%;
+        max-width: 500px;
+      }
+
+      .result-container {
+        margin-top: 20px;
+        width: 80%;
+        max-width: 500px;
+        padding: 20px;
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .result-container label,
+      .result-container input[type="text"],
+      .result-container p {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+
+      .result-container label {
+        font-weight: bold;
+        color: #555;
+      }
+
+      .result-container input[type="text"] {
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        box-sizing: border-box;
+        width: 100%;
+      }
+
+      #dailyExpenseBreakdown {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border: 1px solid #eee;
+        border-radius: 5px;
+      }
+
+      #dailyExpenseBreakdown p {
+        margin: 5px 0;
+      }
+
+      #dailyExpenseBreakdown strong {
+        font-weight: bold;
+      }
+      /* 작은 화면 (최대 768px)에 적용될 스타일 */
+      @media (max-width: 768px) {
+        body {
+          margin: 20px; /* 여백 줄이기 */
+        }
+
+        .input-group {
+          flex-direction: column; /* 세로로 배치 */
+          width: 95%;
+        }
+
+        .input-group label {
+          text-align: left; /* 왼쪽 정렬 */
+          flex-basis: auto;
+          margin-bottom: 5px;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select,
+        button {
+          width: 100%; /* 전체 너비 사용 */
+        }
+
+        #expenseList,
+        #dailyExpenseList,
+        .result-container,
+        hr {
+          width: 95%;
+        }
+      }
+
+      /* 더 작은 화면 (최대 480px)에 적용될 스타일 */
+      @media (max-width: 480px) {
+        h1 {
+          font-size: 1.5rem;
+          margin-bottom: 20px;
+        }
+
+        h2 {
+          font-size: 1.2rem;
+          margin-top: 20px;
+          margin-bottom: 10px;
+        }
+
+        .deleteBtn {
+          font-size: 1rem;
+          padding: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>월 지출 계산기</h1>
+    <div>
+      <input
+        type="number"
+        id="expenseAmount"
+        placeholder="필수 지출 금액 (만원)"
+      />
+      <select id="expenseCategory" name="expenseCategory">
+        <option value="loan">대출</option>
+        <option value="phone">휴대폰</option>
+        <option value="rent">월세</option>
+        <option value="car_loan">자동차 할부금</option>
+        <option value="gas">기름값</option>
+        <option value="transportation">교통비</option>
+      </select>
+      <button id="addExpense">필수 지출 추가</button><br />
+    </div>
+
+    <h2>필수 지출 내역</h2>
+    <ul id="expenseList"></ul>
+    <hr />
+
+    <div id="dailyExpenseInputContainer">
+      <label for="dailyItem">일상 소비 항목</label>
+      <input type="text" id="dailyItem" placeholder="예: 커피, 담배" />
+      <label for="dailyCost">하루 소비 금액</label>
+      <input type="number" id="dailyCost" placeholder="하루 소비 금액 (천원)" />
+      <button id="addDailyExpense">일상 소비 추가</button>
+    </div>
+
+    <h2>일상 소비 내역 (하루)</h2>
+    <ul id="dailyExpenseList"></ul>
+    <hr />
+
+    <div class="result-container">
+      <label for="monthlyIncome">나의 월급</label>
+      <input type="number" id="monthlyIncome" placeholder="월급 (만원)" />
+      <button id="calculate">계산하기</button><br />
+      <label for="totalFixedExpense">총 필수 지출:</label>
+      <input type="text" id="totalFixedExpense" readonly />
+      <div id="dailyExpenseBreakdown">
+        <label>총 일상 소비 (월 예상):</label>
+        <input type="text" id="totalDailyExpenseMonthly" readonly />
+        <div id="dailyExpenseItems"></div>
+        <label>일상 소비 총합 (월 예상):</label>
+        <input type="text" id="totalDailyExpenseSum" readonly />
+      </div>
+      <label for="finalRemainingAmount">최종 남은 금액:</label>
+      <input type="text" id="finalRemainingAmount" readonly />
+    </div>
+
+    <script>
+      const expenseAmountInput = document.getElementById("expenseAmount");
+      const expenseCategorySelect = document.getElementById("expenseCategory");
+      const addExpenseButton = document.getElementById("addExpense");
+      const expenseList = document.getElementById("expenseList");
+      const dailyItemInput = document.getElementById("dailyItem");
+      const dailyCostInput = document.getElementById("dailyCost");
+      const addDailyExpenseButton = document.getElementById("addDailyExpense");
+      const dailyExpenseList = document.getElementById("dailyExpenseList");
+      const monthlyIncomeInput = document.getElementById("monthlyIncome");
+      const calculateButton = document.getElementById("calculate");
+      const totalFixedExpenseInput =
+        document.getElementById("totalFixedExpense");
+      const totalDailyExpenseMonthlyInput = document.getElementById(
+        "totalDailyExpenseMonthly"
+      );
+      const finalRemainingAmountInput = document.getElementById(
+        "finalRemainingAmount"
+      );
+      const dailyExpenseItemsDiv = document.getElementById("dailyExpenseItems");
+      const totalDailyExpenseSumInput = document.getElementById(
+        "totalDailyExpenseSum"
+      );
+
+      let fixedExpenses = [];
+      let dailyExpenses = [];
+      const daysInMonth = 30; // 임의로 30일로 설정
+
+      function formatToCurrency(number, unit = "원") {
+        return `${formatNumberWithCommas(number)}${unit}`;
+      }
+
+      function formatNumberWithCommas(number) {
+        return number.toLocaleString("ko-KR");
+      }
+
+      addExpenseButton.addEventListener("click", () => {
+        const amount = parseInt(expenseAmountInput.value) * 10000; // 만원 단위로 처리
+        const category = expenseCategorySelect.value;
+        const categoryText =
+          expenseCategorySelect.options[expenseCategorySelect.selectedIndex]
+            .text;
+
+        if (!isNaN(amount)) {
+          fixedExpenses.push({
+            category: category,
+            amount: amount,
+            categoryText: categoryText,
+          });
+          renderFixedExpenseList();
+          expenseAmountInput.value = "";
+        } else {
+          alert("유효한 지출 금액을 입력해주세요.");
+        }
+      });
+
+      function renderFixedExpenseList() {
+        expenseList.innerHTML = "";
+        fixedExpenses.forEach((expense, index) => {
+          const listItem = document.createElement("li");
+          listItem.textContent = `${expense.categoryText}: ${formatToCurrency(
+            expense.amount
+          )}`;
+
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "X";
+          deleteButton.className = "deleteBtn";
+          deleteButton.addEventListener("click", () => {
+            fixedExpenses.splice(index, 1);
+            renderFixedExpenseList();
+          });
+
+          listItem.appendChild(deleteButton);
+          expenseList.appendChild(listItem);
+        });
+      }
+
+      addDailyExpenseButton.addEventListener("click", () => {
+        const item = dailyItemInput.value.trim();
+        const cost = parseInt(dailyCostInput.value) * 1000; // 천원 단위로 처리
+
+        if (item && !isNaN(cost)) {
+          dailyExpenses.push({ item: item, cost: cost });
+          renderDailyExpenseList();
+          dailyItemInput.value = "";
+          dailyCostInput.value = "";
+        } else {
+          alert("일상 소비 항목과 하루 소비 금액 (천원)을 입력해주세요.");
+        }
+      });
+
+      function renderDailyExpenseList() {
+        dailyExpenseList.innerHTML = "";
+        dailyExpenses.forEach((dailyExpense, index) => {
+          const listItem = document.createElement("li");
+          listItem.textContent = `${dailyExpense.item}: ${formatToCurrency(
+            dailyExpense.cost
+          )} (하루)`;
+
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "X";
+          deleteButton.className = "deleteBtn";
+          deleteButton.addEventListener("click", () => {
+            dailyExpenses.splice(index, 1);
+            renderDailyExpenseList();
+          });
+
+          listItem.appendChild(deleteButton);
+          dailyExpenseList.appendChild(listItem);
+        });
+      }
+
+      calculateButton.addEventListener("click", () => {
+        const income = parseInt(monthlyIncomeInput.value) * 10000; // 만원 단위로 처리
+        let totalFixedExpense = 0;
+        fixedExpenses.forEach((expense) => {
+          totalFixedExpense += expense.amount;
+        });
+
+        let totalDailyExpenseMonthly = 0;
+        dailyExpenseItemsDiv.innerHTML = ""; // 기존 내용 초기화
+        dailyExpenses.forEach((daily) => {
+          const monthlyCost = daily.cost * daysInMonth;
+          totalDailyExpenseMonthly += monthlyCost;
+          const itemParagraph = document.createElement("p");
+          itemParagraph.textContent = `${daily.item}: ${formatToCurrency(
+            daily.cost
+          )} (하루) x ${daysInMonth} = ${formatToCurrency(monthlyCost)}`;
+          dailyExpenseItemsDiv.appendChild(itemParagraph);
+        });
+        totalDailyExpenseSumInput.value = formatToCurrency(
+          totalDailyExpenseMonthly
+        );
+
+        totalFixedExpenseInput.value = formatToCurrency(totalFixedExpense);
+        totalDailyExpenseMonthlyInput.value = formatToCurrency(
+          totalDailyExpenseMonthly
+        );
+
+        if (!isNaN(income)) {
+          finalRemainingAmountInput.value = formatToCurrency(
+            income - totalFixedExpense - totalDailyExpenseMonthly
+          );
+        } else {
+          finalRemainingAmountInput.value = "월급을 입력해주세요 (만원).";
+        }
+      });
+
+      expenseAmountInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          addExpenseButton.click();
+        }
+      });
+
+      dailyCostInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          addDailyExpenseButton.click();
+        }
+      });
+
+      // 입력 필드 placeholder 및 제목 수정
+      document.getElementById("expenseAmount").placeholder =
+        "필수 지출 금액 (만원)";
+      document.getElementById("monthlyIncome").placeholder = "월급 (만원)";
+      document.getElementById("dailyCost").placeholder =
+        "하루 소비 금액 (천원)";
+      document.querySelector("h2:nth-child(3)").textContent = "필수 지출 내역";
+      document.querySelector("h2:nth-child(5)").textContent =
+        "일상 소비 내역 (하루)";
+    </script>
+  </body>
+</html>
