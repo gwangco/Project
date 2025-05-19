@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>댓글 분석 결과</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+      .container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+      }
+      h2 {
+        color: #555;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+      }
+      h3 {
+        margin-top: 20px;
+      }
+      .overall-sentiment {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-top: 15px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-align: center;
+      }
+      .긍정 {
+        color: blue;
+        font-weight: bold;
+      }
+      .부정 {
+        color: red;
+        font-weight: bold;
+      }
+      .중립 {
+        color: green;
+        font-weight: bold;
+      }
+      .판단_어려움 {
+        color: gray;
+        font-weight: bold;
+      }
+      .모델_로드_실패 {
+        color: orange;
+        font-weight: bold;
+      }
+      .대체로_긍정 {
+        color: skyblue;
+        font-weight: bold;
+      }
+      .대체로_부정 {
+        color: salmon;
+        font-weight: bold;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        background-color: #f9f9f9;
+        border: 1px solid #eee;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+      }
+      a {
+        color: #007bff;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>댓글 분석 결과</h1>
+      <h2>분석 URL: <a href="{{ url }}" target="_blank">{{ url }}</a></h2>
+
+      <div class="overall-sentiment">
+        <strong>뉴스 평가:</strong>
+        <span class="{{ overall_sentiment|replace(' ', '_') }}"
+          >{{ overall_sentiment }}</span
+        >
+      </div>
+
+      {% if results %}
+      <h3>댓글 목록 (총 {{ results|length }}개)</h3>
+      <ul>
+        {% for item in results %}
+        <li>
+          <p>{{ item.comment }}</p>
+          <p>
+            <strong>감성:</strong>
+            <span class="{{ item.sentiment }}">{{ item.sentiment }}</span>
+          </p>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>분석된 댓글이 없거나, 댓글을 가져올 수 없습니다.</p>
+      {% endif %}
+      <br />
+      <a href="{{ url_for('index') }}">다른 뉴스 분석하기</a>
+    </div>
+  </body>
+</html>

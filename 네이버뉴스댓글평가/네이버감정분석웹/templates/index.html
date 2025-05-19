@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>네이버 뉴스댓글 감성 분석기</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+      .container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      input[type="url"] {
+        width: calc(100% - 22px);
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .error {
+        color: red;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>네이버 뉴스댓글 감성 분석기</h1>
+      {% if error %}
+      <p class="error">{{ error }}</p>
+      {% endif %}
+      <form action="{{ url_for('analyze') }}" method="POST">
+        <label for="naver_url">분석할 네이버 URL을 입력하세요:</label>
+        <input
+          type="url"
+          id="naver_url"
+          name="naver_url"
+          placeholder="예: https://news.naver.com/..."
+          required
+        />
+        <button type="submit">분석 시작</button>
+      </form>
+    </div>
+  </body>
+</html>
